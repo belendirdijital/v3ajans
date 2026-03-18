@@ -26,6 +26,7 @@ export function BlogsList() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [formError, setFormError] = useState("");
   const [formLoading, setFormLoading] = useState(false);
+  const [seedLoading, setSeedLoading] = useState(false);
   const router = useRouter();
 
   async function fetchPosts() {
@@ -141,6 +142,27 @@ export function BlogsList() {
     }
   }
 
+  async function handleSeed() {
+    if (!confirm("Her kategori için örnek blog yazıları eklenecek. Devam edilsin mi?")) return;
+    setFormError("");
+    setSeedLoading(true);
+    try {
+      const res = await fetch("/api/admin/seed-blogs", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) {
+        setFormError(data.error || "Yazılar eklenemedi.");
+        return;
+      }
+      await fetchPosts();
+      setFormError("");
+      alert(data.message || "Blog yazıları başarıyla eklendi.");
+    } catch {
+      setFormError("Bağlantı hatası.");
+    } finally {
+      setSeedLoading(false);
+    }
+  }
+
   if (loading) {
     return (
       <Container>
@@ -153,9 +175,18 @@ export function BlogsList() {
     <Container>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold text-slate-900">Blog Yazıları</h1>
-        <Button onClick={() => (showForm ? closeForm() : setShowForm(true))}>
-          {showForm ? "İptal" : "Yeni Yazı Ekle"}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="secondary"
+            onClick={handleSeed}
+            disabled={seedLoading}
+          >
+            {seedLoading ? "Ekleniyor..." : "Her Kategori İçin Örnek Yazılar Ekle"}
+          </Button>
+          <Button onClick={() => (showForm ? closeForm() : setShowForm(true))}>
+            {showForm ? "İptal" : "Yeni Yazı Ekle"}
+          </Button>
+        </div>
       </div>
 
       {showForm && (
