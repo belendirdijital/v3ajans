@@ -1,6 +1,6 @@
 export const siteConfig = {
   name: "V3",
-  logo: "/logo.svg",
+  logo: "/logo.png",
   tagline: "Sosyal Medyada Markanızın Sesi",
   description: "Sosyal medya yönetimi, içerik üretimi ve dijital pazarlama hizmetleri ile markanızı sosyal medyada öne çıkarıyoruz.",
   email: "v3ajans@gmail.com",
