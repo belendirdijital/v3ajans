@@ -45,9 +45,9 @@ export function FirstTimeSetupForm() {
         <Image
           src={siteConfig.logo}
           alt={siteConfig.name}
-          width={64}
-          height={28}
-          className="h-8 w-auto object-contain"
+          width={160}
+          height={36}
+          className="h-10 w-auto object-contain"
         />
       </div>
       <h1 className="text-xl font-bold text-slate-900">İlk Yönetici Oluştur</h1>

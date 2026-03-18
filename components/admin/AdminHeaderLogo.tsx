@@ -8,9 +8,9 @@ export function AdminHeaderLogo() {
       <Image
         src={siteConfig.logo}
         alt={siteConfig.name}
-        width={56}
-        height={25}
-        className="h-7 w-auto object-contain"
+        width={140}
+        height={32}
+        className="h-8 w-auto object-contain"
       />
       <span className="text-slate-500">— Admin</span>
     </Link>

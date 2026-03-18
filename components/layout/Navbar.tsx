@@ -19,16 +19,16 @@ export function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/98 shadow-sm shadow-slate-200/50 backdrop-blur-md">
       <Container>
         <nav className="flex h-16 items-center justify-between lg:h-20">
           <Link href="/" className="flex items-center">
             <Image
               src={siteConfig.logo}
               alt={siteConfig.name}
-              width={80}
-              height={36}
-              className="h-9 w-auto object-contain lg:h-10"
+              width={170}
+              height={40}
+              className="h-10 w-auto object-contain lg:h-11"
               priority
             />
           </Link>

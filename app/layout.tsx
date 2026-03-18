@@ -9,12 +9,12 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "V3 | Sosyal Medya Yönetimi & Dijital Pazarlama",
+  title: "V3 Ajans | Sosyal Medya Yönetimi & Dijital Pazarlama",
   description:
     "Sosyal medya yönetimi, içerik üretimi ve dijital pazarlama. Instagram, TikTok, Facebook hesaplarınızı profesyonelce yönetiyoruz.",
   keywords: ["sosyal medya yönetimi", "dijital ajans", "içerik üretimi", "sosyal medya ajansı", "dijital pazarlama"],
   openGraph: {
-    title: "V3 | Sosyal Medya Yönetimi & Dijital Pazarlama",
+    title: "V3 Ajans | Sosyal Medya Yönetimi & Dijital Pazarlama",
     description: "Sosyal medya yönetimi ve içerik üretimi ile markanızı sosyal medyada öne çıkarıyoruz.",
   },
 };
