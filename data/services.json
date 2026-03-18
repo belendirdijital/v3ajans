@@ -1,0 +1,67 @@
+[
+  {
+    "id": "social",
+    "title": "Sosyal Medya Yönetimi",
+    "description": "Instagram, TikTok, Facebook ve diğer platformlarda hesap yönetimi, içerik planlaması ve topluluk yönetimi hizmetleri.",
+    "features": [
+      "Hesap Yönetimi",
+      "İçerik Planı",
+      "Topluluk Yönetimi"
+    ],
+    "icon": "📱",
+    "slug": "sosyal-medya-yonetimi",
+    "createdAt": "2025-03-18T12:00:00.000Z"
+  },
+  {
+    "id": "content",
+    "title": "İçerik Üretimi",
+    "description": "Reel, video, görsel ve yazılı içeriklerle markanızı sosyal medyada canlı tutuyoruz. Yaratıcı ve etkileyici paylaşımlar.",
+    "features": [
+      "Reel & Video",
+      "Grafik Tasarım",
+      "Kopya Yazımı"
+    ],
+    "icon": "🎬",
+    "slug": "icerik-uretimi",
+    "createdAt": "2025-03-18T12:00:00.000Z"
+  },
+  {
+    "id": "ads",
+    "title": "Reklam & Kampanya",
+    "description": "Meta Ads, TikTok Ads ve Google reklamları ile hedef kitlenize ulaşıyor, kampanyalarınızı yönetiyoruz.",
+    "features": [
+      "Meta Ads",
+      "TikTok Ads",
+      "Performans Takibi"
+    ],
+    "icon": "📈",
+    "slug": "reklam-kampanya",
+    "createdAt": "2025-03-18T12:00:00.000Z"
+  },
+  {
+    "id": "branding",
+    "title": "Marka & Tasarım",
+    "description": "Markanızın sosyal medya görünümünü oluşturuyoruz. Logo, görsel kimlik ve dijital varlıklar.",
+    "features": [
+      "Görsel Kimlik",
+      "Profil Düzenleme",
+      "Marka Dil"
+    ],
+    "icon": "✨",
+    "slug": "marka-tasarim",
+    "createdAt": "2025-03-18T12:00:00.000Z"
+  },
+  {
+    "id": "software",
+    "title": "Yazılım Geliştirme",
+    "description": "Web siteleri, özel yazılımlar ve işletmelere özel dijital çözümler geliştiriyoruz. İş süreçlerinizi hızlandıran modern yazılım altyapıları oluşturuyoruz.",
+    "features": [
+      "Kurumsal Web Siteleri",
+      "Özel Web Yazılımları",
+      "Otomasyon Sistemleri"
+    ],
+    "icon": "💻",
+    "slug": "yazilim-gelistirme",
+    "createdAt": "2025-03-18T12:00:00.000Z"
+  }
+]

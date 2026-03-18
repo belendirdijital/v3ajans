@@ -1,0 +1,67 @@
+[
+  {
+    "id": "1",
+    "title": "2025'te Instagram Reel Trendleri",
+    "slug": "2025-instagram-reel-trendleri",
+    "excerpt": "Yeni yılda Instagram'da öne çıkacak Reel trendleri ve içerik fikirleri.",
+    "content": "Instagram Reel'ler her yıl yeni trendlerle gelişiyor. 2025'te kısa format video, trend sesler ve yaratıcı geçişler öne çıkıyor. Markanız için etkileyici Reel içerikleri üretmek, sosyal medyada görünürlüğünüzü artırmanın anahtarıdır.",
+    "category": "instagram",
+    "readingTime": 4,
+    "date": "2025-03-15",
+    "featured": true,
+    "createdAt": "2025-03-18T12:00:00.000Z",
+    "image": "/blog/1773827160456.webp"
+  },
+  {
+    "id": "2",
+    "title": "Sosyal Medya İçin İçerik Stratejisi",
+    "slug": "sosyal-medya-icerik-stratejisi",
+    "excerpt": "Takipçi ve etkileşim artırmak için içerik planlaması nasıl yapılır?",
+    "content": "Doğru içerik stratejisi takipçi ve etkileşim artırmanın anahtarıdır. Hedef kitle analizi, içerik takvimi oluşturma ve tutarlı paylaşım planı başarılı sosyal medya yönetiminin temel taşlarıdır.",
+    "category": "strateji",
+    "readingTime": 5,
+    "date": "2025-03-10",
+    "featured": false,
+    "createdAt": "2025-03-18T12:00:00.000Z",
+    "image": "/blog/1773827187938.webp"
+  },
+  {
+    "id": "3",
+    "title": "TikTok mu Instagram mı?",
+    "slug": "tiktok-mu-instagram-mi",
+    "excerpt": "Markanız için hangi platform daha uygun? Karşılaştırma ve öneriler.",
+    "content": "Markanız için doğru platform seçimi önemlidir. Instagram daha kurumsal markalara uygunken, TikTok genç kitle için ideal olabilir. Hedef kitlenize göre karar verin.",
+    "category": "tiktok",
+    "readingTime": 3,
+    "date": "2025-03-05",
+    "featured": false,
+    "createdAt": "2025-03-18T12:00:00.000Z",
+    "image": "/blog/1773827168135.png"
+  },
+  {
+    "id": "4",
+    "title": "Sosyal Medya Reklamcılığı: Meta ve TikTok Reklamları",
+    "slug": "sosyal-medya-reklamciligi-meta-tiktok",
+    "excerpt": "Meta Ads ve TikTok Ads ile hedef kitlenize ulaşmanın püf noktaları.",
+    "content": "Sosyal medya reklamcılığı markanızı doğru kitleye ulaştırmanın en etkili yollarından biridir. Meta Ads (Facebook ve Instagram) ile demografik ve ilgi alanı bazlı hedefleme yapabilir, TikTok Ads ile genç ve dinamik kitlelere ulaşabilirsiniz. Bütçe optimizasyonu, A/B testleri ve dönüşüm izleme başarılı kampanyaların temelidir. Organik içerik tek başına yeterli olmayabilir; reklam bütçenizi stratejik kullanarak büyümeyi hızlandırabilirsiniz.",
+    "category": "reklam",
+    "readingTime": 6,
+    "date": "2025-03-12",
+    "featured": false,
+    "createdAt": "2025-03-18T14:00:00.000Z",
+    "image": "/blog/1773827300213.png"
+  },
+  {
+    "id": "5",
+    "title": "Etkileyici İçerik Üretimi: Video ve Görsel İpuçları",
+    "slug": "etkileyici-icerik-uretimi-video-gorsel",
+    "excerpt": "Sosyal medyada dikkat çeken video ve görsel içerik nasıl üretilir?",
+    "content": "Sosyal medyada öne çıkmak için kaliteli içerik üretimi şarttır. İlk 3 saniyede dikkat çekmek, hikaye anlatımı, trend müzik kullanımı ve tutarlı görsel dil markanızı akılda kalıcı kılar. Canva, CapCut gibi araçlar profesyonel görünümlü içerik üretmeyi kolaylaştırır. İçerik takvimi oluşturup planlı paylaşım yaparak hem zamandan tasarruf eder hem de etkileşimi artırırsınız.",
+    "category": "icerik-uretimi",
+    "readingTime": 5,
+    "date": "2025-03-08",
+    "featured": false,
+    "createdAt": "2025-03-18T14:00:00.000Z",
+    "image": "/blog/1773827340278.jpg"
+  }
+]

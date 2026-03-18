@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Doğukan İpek",
+    "email": "dogukanipek@gmail.com",
+    "phone": "5395959595",
+    "message": "Sosyal medya hesaplarımın yönetilşmesi istiyorum",
+    "id": "7200e273-ed6e-4a8f-8bd9-63ec181c5cd2",
+    "createdAt": "2026-03-18T12:18:16.353Z",
+    "status": "yeni"
+  },
+  {
+    "name": "Hasan Özkan",
+    "email": "hasanozkan@gmail.com",
+    "phone": "5334445666",
+    "message": "Sosyal medya sayfam için destek istiyorum",
+    "id": "990292df-a09b-4a21-920e-e07cadeaa97e",
+    "createdAt": "2026-03-18T11:04:49.586Z",
+    "status": "yeni"
+  },
+  {
+    "name": "Mahir Belendir",
+    "email": "mahirbelendir@gmail.com",
+    "phone": "5365757111",
+    "message": "Web sitesi istiyorum dönüşlerinizi bekliyorum",
+    "id": "958d169d-6464-4f9b-bf23-6207ca1c2d82",
+    "createdAt": "2026-03-18T08:46:23.770Z",
+    "status": "yeni"
+  },
+  {
+    "name": "Alparslan Mahir Belendir",
+    "email": "alparslanbelendir@gmail.com",
+    "phone": "05308905196",
+    "message": "Sosyal medya hesabımın yönetilmesini istiyorum geri dönüşlerinizi bekliyorum",
+    "id": "abb3694e-dacc-4119-9c9f-0472f16d1673",
+    "createdAt": "2026-03-18T08:45:49.734Z",
+    "status": "yeni"
+  }
+]
