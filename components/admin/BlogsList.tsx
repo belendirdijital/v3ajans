@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Container } from "@/components/ui/Container";
@@ -27,7 +27,16 @@ export function BlogsList() {
   const [formError, setFormError] = useState("");
   const [formLoading, setFormLoading] = useState(false);
   const [seedLoading, setSeedLoading] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    if (showForm && formRef.current) {
+      requestAnimationFrame(() => {
+        formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  }, [showForm]);
 
   async function fetchPosts() {
     try {
@@ -191,6 +200,7 @@ export function BlogsList() {
 
       {showForm && (
         <form
+          ref={formRef}
           onSubmit={handleSubmit}
           className="mt-8 space-y-4 rounded-2xl border border-slate-200 bg-white p-8 shadow-lg"
         >
