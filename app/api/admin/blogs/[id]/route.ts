@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/auth";
 import { deleteBlogPost, updateBlogPost } from "@/lib/blogs";
 import { BLOG_CATEGORIES } from "@/lib/blogs";
-import path from "path";
-import { mkdir } from "fs/promises";
+import { put } from "@vercel/blob";
+
+export const maxDuration = 60;
 
 export async function PATCH(
   request: Request,
@@ -49,15 +50,36 @@ export async function PATCH(
     };
 
     if (file && file.size > 0) {
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const uploadDir = path.join(process.cwd(), "public", "blog");
-      await mkdir(uploadDir, { recursive: true });
-      const ext = path.extname(file.name) || ".jpg";
-      const filename = `${Date.now()}${ext}`;
-      const { writeFile } = await import("fs/promises");
-      await writeFile(path.join(uploadDir, filename), buffer);
-      updateData.image = `/blog/${filename}`;
+      if (!process.env.BLOB_READ_WRITE_TOKEN) {
+        return NextResponse.json(
+          {
+            error:
+              "Görsel yüklemek için Vercel Blob kurulu olmalı. Storage > Blob store oluşturup projeyi yeniden deploy edin.",
+          },
+          { status: 500 }
+        );
+      }
+      if (file.size > 4 * 1024 * 1024) {
+        return NextResponse.json(
+          { error: "Görsel en fazla 4 MB olabilir. Lütfen daha küçük bir dosya seçin." },
+          { status: 400 }
+        );
+      }
+      try {
+        const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+        const blob = await put(`blog/${Date.now()}.${ext}`, file, {
+          access: "public",
+          addRandomSuffix: true,
+        });
+        updateData.image = blob.url;
+      } catch (e) {
+        console.error("Blob upload error:", e);
+        const msg = e instanceof Error ? e.message : "Görsel yüklenemedi.";
+        return NextResponse.json(
+          { error: `Görsel yükleme hatası: ${msg}` },
+          { status: 500 }
+        );
+      }
     }
 
     const updated = await updateBlogPost(id, updateData);
@@ -67,8 +89,10 @@ export async function PATCH(
     return NextResponse.json(updated);
   } catch (error) {
     console.error("Blog update error:", error);
+    const message =
+      error instanceof Error ? error.message : "Bir hata oluştu.";
     return NextResponse.json(
-      { error: "Bir hata oluştu." },
+      { error: `Bir hata oluştu: ${message}` },
       { status: 500 }
     );
   }

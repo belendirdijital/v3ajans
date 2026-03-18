@@ -5,8 +5,9 @@ import {
   addBlogPost,
   BLOG_CATEGORIES,
 } from "@/lib/blogs";
-import path from "path";
-import { mkdir } from "fs/promises";
+import { put } from "@vercel/blob";
+
+export const maxDuration = 60;
 
 export async function GET() {
   if (!(await isAdmin())) {
@@ -59,16 +60,36 @@ export async function POST(request: Request) {
     let imagePath: string | undefined;
 
     if (file && file.size > 0) {
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const uploadDir = path.join(process.cwd(), "public", "blog");
-      await mkdir(uploadDir, { recursive: true });
-      const ext = path.extname(file.name) || ".jpg";
-      const filename = `${Date.now()}${ext}`;
-      const filePath = path.join(uploadDir, filename);
-      const { writeFile } = await import("fs/promises");
-      await writeFile(filePath, buffer);
-      imagePath = `/blog/${filename}`;
+      if (!process.env.BLOB_READ_WRITE_TOKEN) {
+        return NextResponse.json(
+          {
+            error:
+              "Görsel yüklemek için Vercel Blob kurulu olmalı. Storage > Blob store oluşturup projeyi yeniden deploy edin.",
+          },
+          { status: 400 }
+        );
+      }
+      if (file.size > 4 * 1024 * 1024) {
+        return NextResponse.json(
+          { error: "Görsel en fazla 4 MB olabilir. Lütfen daha küçük bir dosya seçin." },
+          { status: 400 }
+        );
+      }
+      try {
+        const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+        const blob = await put(`blog/${Date.now()}.${ext}`, file, {
+          access: "public",
+          addRandomSuffix: true,
+        });
+        imagePath = blob.url;
+      } catch (e) {
+        console.error("Blob upload error:", e);
+        const msg = e instanceof Error ? e.message : "Görsel yüklenemedi.";
+        return NextResponse.json(
+          { error: `Görsel yükleme hatası: ${msg}` },
+          { status: 500 }
+        );
+      }
     }
 
     const post = await addBlogPost({
@@ -88,8 +109,10 @@ export async function POST(request: Request) {
     return NextResponse.json(post);
   } catch (error) {
     console.error("Blog add error:", error);
+    const message =
+      error instanceof Error ? error.message : "Bir hata oluştu.";
     return NextResponse.json(
-      { error: "Bir hata oluştu." },
+      { error: `Bir hata oluştu: ${message}` },
       { status: 500 }
     );
   }
