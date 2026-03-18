@@ -11,6 +11,8 @@ import { TestimonialsSection } from "@/components/sections/TestimonialsSection";
 import { FAQSection } from "@/components/sections/FAQSection";
 import { ContactCTASection } from "@/components/sections/ContactCTASection";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const [partners, services] = await Promise.all([
     getPartners(),

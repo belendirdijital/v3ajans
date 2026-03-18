@@ -1,5 +1,4 @@
-import { readFile, writeFile } from "fs/promises";
-import path from "path";
+import { sql, ensurePartnersTable } from "./db";
 
 export interface Partner {
   id: string;
@@ -10,24 +9,30 @@ export interface Partner {
   createdAt: string;
 }
 
-const PARTNERS_FILE = path.join(process.cwd(), "data", "partners.json");
-
-async function ensurePartnersFile() {
-  try {
-    await readFile(PARTNERS_FILE);
-  } catch {
-    await writeFile(PARTNERS_FILE, JSON.stringify([], null, 2));
-  }
+function asRows<T>(result: unknown): T[] {
+  return Array.isArray(result) ? result : [];
 }
 
 export async function getPartners(): Promise<Partner[]> {
-  try {
-    await ensurePartnersFile();
-    const data = await readFile(PARTNERS_FILE, "utf-8");
-    return JSON.parse(data);
-  } catch {
-    return [];
-  }
+  await ensurePartnersTable();
+
+  const rows = asRows<{
+    id: string;
+    name: string;
+    logo: string | null;
+    initials: string | null;
+    url: string | null;
+    created_at: Date;
+  }>(await sql`SELECT * FROM partners ORDER BY created_at ASC`);
+
+  return rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    logo: r.logo ?? undefined,
+    initials: r.initials ?? undefined,
+    url: r.url ?? undefined,
+    createdAt: (r.created_at as Date).toISOString(),
+  }));
 }
 
 export async function addPartner(data: {
@@ -36,36 +41,44 @@ export async function addPartner(data: {
   initials?: string;
   url?: string;
 }): Promise<Partner> {
-  await ensurePartnersFile();
-  const partners = await getPartners();
-  const newPartner: Partner = {
-    id: crypto.randomUUID(),
-    name: data.name.trim(),
-    logo: data.logo,
-    initials: data.initials?.trim(),
-    url: data.url?.trim() || undefined,
-    createdAt: new Date().toISOString(),
+  await ensurePartnersTable();
+
+  const id = crypto.randomUUID();
+  await sql`
+    INSERT INTO partners (id, name, logo, initials, url)
+    VALUES (
+      ${id},
+      ${data.name.trim()},
+      ${data.logo ?? null},
+      ${data.initials?.trim() ?? null},
+      ${data.url?.trim() || null}
+    )
+  `;
+
+  const inserted = asRows<{
+    id: string;
+    name: string;
+    logo: string | null;
+    initials: string | null;
+    url: string | null;
+    created_at: Date;
+  }>(await sql`SELECT * FROM partners WHERE id = ${id} LIMIT 1`);
+  const r = inserted[0]!;
+  return {
+    id: r.id,
+    name: r.name,
+    logo: r.logo ?? undefined,
+    initials: r.initials ?? undefined,
+    url: r.url ?? undefined,
+    createdAt: (r.created_at as Date).toISOString(),
   };
-  partners.push(newPartner);
-  await writeFile(PARTNERS_FILE, JSON.stringify(partners, null, 2));
-  return newPartner;
 }
 
 export async function deletePartner(id: string): Promise<boolean> {
-  const partners = await getPartners();
-  const partner = partners.find((p) => p.id === id);
-  const filtered = partners.filter((p) => p.id !== id);
-  if (filtered.length === partners.length) return false;
-  await writeFile(PARTNERS_FILE, JSON.stringify(filtered, null, 2));
-  // Logo dosyasını sil (varsa)
-  if (partner?.logo) {
-    try {
-      const { unlink } = await import("fs/promises");
-      const logoPath = path.join(process.cwd(), "public", partner.logo);
-      await unlink(logoPath);
-    } catch {
-      // Dosya bulunamadıysa sessizce geç
-    }
-  }
-  return true;
+  await ensurePartnersTable();
+  // Logo dosyasını silmek Vercel'de çalışmaz (read-only) - sessizce atlanır
+  const deleted = asRows<{ id: string }>(
+    await sql`DELETE FROM partners WHERE id = ${id} RETURNING id`
+  );
+  return deleted.length > 0;
 }

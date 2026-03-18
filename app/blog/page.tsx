@@ -7,6 +7,8 @@ import { getBlogPosts } from "@/lib/blogs";
 import { BlogCTA } from "@/components/blog/BlogCTA";
 import { BlogPostList } from "@/components/blog/BlogPostList";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Blog | V3 Sosyal Medya Ajansı",
   description:

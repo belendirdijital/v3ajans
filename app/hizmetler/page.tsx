@@ -6,6 +6,8 @@ import { PageHero } from "@/components/layout/PageHero";
 import { ServiceCard } from "@/components/hizmetler/ServiceCard";
 import { getServices } from "@/lib/services";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Hizmetler | V3 Sosyal Medya Ajansı",
   description:
