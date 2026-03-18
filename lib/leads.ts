@@ -1,5 +1,4 @@
-import { readFile, writeFile } from "fs/promises";
-import path from "path";
+import { sql, ensureLeadsTable } from "./db";
 
 export interface Lead {
   id: string;
@@ -18,41 +17,108 @@ export interface Lead {
     | "yanitlandi";
 }
 
-const LEADS_FILE = path.join(process.cwd(), "data", "leads.json");
-
-async function ensureLeadsFile() {
-  try {
-    await readFile(LEADS_FILE);
-  } catch {
-    await writeFile(LEADS_FILE, JSON.stringify([], null, 2));
-  }
+function asRows<T>(result: unknown): T[] {
+  return Array.isArray(result) ? result : [];
 }
 
 export async function getLeads(): Promise<Lead[]> {
-  await ensureLeadsFile();
-  const data = await readFile(LEADS_FILE, "utf-8");
-  return JSON.parse(data);
+  await ensureLeadsTable();
+  const rows = asRows<{
+    id: string;
+    name: string;
+    email: string;
+    phone: string | null;
+    message: string;
+    status: string;
+    created_at: Date;
+  }>(
+    await sql`
+    SELECT id, name, email, phone, message, status, created_at
+    FROM leads
+    ORDER BY created_at DESC
+  `
+  );
+  return rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    email: r.email,
+    phone: r.phone ?? undefined,
+    message: r.message,
+    status: r.status as Lead["status"],
+    createdAt: (r.created_at as Date).toISOString(),
+  }));
 }
 
-export async function addLead(lead: Omit<Lead, "id" | "createdAt" | "status">) {
-  await ensureLeadsFile();
-  const leads = await getLeads();
-  const newLead: Lead = {
-    ...lead,
-    id: crypto.randomUUID(),
-    createdAt: new Date().toISOString(),
-    status: "yeni",
+export async function addLead(
+  lead: Omit<Lead, "id" | "createdAt" | "status">
+) {
+  await ensureLeadsTable();
+
+  const id = crypto.randomUUID();
+  await sql`
+    INSERT INTO leads (id, name, email, phone, message)
+    VALUES (${id}, ${lead.name}, ${lead.email}, ${lead.phone ?? null}, ${lead.message})
+  `;
+
+  const inserted = asRows<{
+    id: string;
+    name: string;
+    email: string;
+    phone: string | null;
+    message: string;
+    status: string;
+    created_at: Date;
+  }>(
+    await sql`
+    SELECT id, name, email, phone, message, status, created_at
+    FROM leads WHERE id = ${id}
+  `
+  );
+  const r = inserted[0]!;
+  return {
+    id: r.id,
+    name: r.name,
+    email: r.email,
+    phone: r.phone ?? undefined,
+    message: r.message,
+    status: r.status as Lead["status"],
+    createdAt: (r.created_at as Date).toISOString(),
   };
-  leads.unshift(newLead);
-  await writeFile(LEADS_FILE, JSON.stringify(leads, null, 2));
-  return newLead;
 }
 
-export async function updateLeadStatus(id: string, status: Lead["status"]) {
-  const leads = await getLeads();
-  const index = leads.findIndex((l) => l.id === id);
-  if (index === -1) return null;
-  leads[index]!.status = status;
-  await writeFile(LEADS_FILE, JSON.stringify(leads, null, 2));
-  return leads[index];
+export async function updateLeadStatus(
+  id: string,
+  status: Lead["status"]
+): Promise<Lead | null> {
+  await ensureLeadsTable();
+
+  await sql`
+    UPDATE leads SET status = ${status!} WHERE id = ${id}
+  `;
+
+  const rows = asRows<{
+    id: string;
+    name: string;
+    email: string;
+    phone: string | null;
+    message: string;
+    status: string;
+    created_at: Date;
+  }>(
+    await sql`
+    SELECT id, name, email, phone, message, status, created_at
+    FROM leads WHERE id = ${id}
+  `
+  );
+  if (rows.length === 0) return null;
+  const r = rows[0]!;
+  return {
+    id: r.id,
+    name: r.name,
+    email: r.email,
+    phone: r.phone ?? undefined,
+    message: r.message,
+    status: r.status as Lead["status"],
+    createdAt: (r.created_at as Date).toISOString(),
+  };
 }
