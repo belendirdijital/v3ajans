@@ -1,6 +1,5 @@
-import { readFile, writeFile } from "fs/promises";
-import path from "path";
 import { randomBytes, scryptSync, timingSafeEqual } from "crypto";
+import { sql, ensureAdminUsersTable } from "./db";
 
 export interface AdminUser {
   id: string;
@@ -11,8 +10,6 @@ export interface AdminUser {
 }
 
 export type SafeAdminUser = Omit<AdminUser, "passwordHash">;
-
-const USERS_FILE = path.join(process.cwd(), "data", "users.json");
 
 function hashPassword(password: string): string {
   const salt = randomBytes(16).toString("hex");
@@ -32,31 +29,54 @@ function verifyPassword(password: string, stored: string): boolean {
   }
 }
 
-async function ensureUsersFile() {
-  try {
-    await readFile(USERS_FILE);
-  } catch {
-    await writeFile(
-      path.join(process.cwd(), "data", "users.json"),
-      JSON.stringify([], null, 2)
-    );
-  }
+function asRows<T>(result: unknown): T[] {
+  return Array.isArray(result) ? result : [];
 }
 
 export async function getUsers(): Promise<SafeAdminUser[]> {
-  await ensureUsersFile();
-  const data = await readFile(USERS_FILE, "utf-8");
-  const users: AdminUser[] = JSON.parse(data);
-  return users.map(({ passwordHash: _, ...u }) => u);
+  await ensureAdminUsersTable();
+  const rows = asRows<{ id: string; email: string; name: string; created_at: Date }>(
+    await sql`
+    SELECT id, email, name, created_at
+    FROM admin_users
+    ORDER BY created_at ASC
+  `
+  );
+  return rows.map((r) => ({
+    id: r.id,
+    email: r.email,
+    name: r.name,
+    createdAt: (r.created_at as Date).toISOString(),
+  }));
 }
 
 export async function getUserByEmail(
   email: string
 ): Promise<(AdminUser & { passwordHash: string }) | null> {
-  await ensureUsersFile();
-  const data = await readFile(USERS_FILE, "utf-8");
-  const users: AdminUser[] = JSON.parse(data);
-  return users.find((u) => u.email.toLowerCase() === email.toLowerCase()) ?? null;
+  await ensureAdminUsersTable();
+  const rows = asRows<{
+    id: string;
+    email: string;
+    name: string;
+    password_hash: string;
+    created_at: Date;
+  }>(
+    await sql`
+    SELECT id, email, name, password_hash, created_at
+    FROM admin_users
+    WHERE LOWER(email) = LOWER(${email})
+    LIMIT 1
+  `
+  );
+  if (rows.length === 0) return null;
+  const r = rows[0]!;
+  return {
+    id: r.id,
+    email: r.email,
+    name: r.name,
+    passwordHash: r.password_hash,
+    createdAt: (r.created_at as Date).toISOString(),
+  };
 }
 
 export async function verifyUser(
@@ -71,78 +91,116 @@ export async function verifyUser(
 export async function createUser(
   data: { email: string; name: string; password: string }
 ): Promise<SafeAdminUser> {
-  await ensureUsersFile();
-  const users: AdminUser[] = JSON.parse(
-    await readFile(USERS_FILE, "utf-8")
-  );
+  await ensureAdminUsersTable();
 
   const existing = await getUserByEmail(data.email);
   if (existing) {
     throw new Error("Bu e-posta adresi zaten kayıtlı.");
   }
 
-  const newUser: AdminUser = {
-    id: crypto.randomUUID(),
-    email: data.email.trim().toLowerCase(),
-    name: data.name.trim(),
-    passwordHash: hashPassword(data.password),
+  const id = crypto.randomUUID();
+  const email = data.email.trim().toLowerCase();
+  const name = data.name.trim();
+  const passwordHash = hashPassword(data.password);
+
+  await sql`
+    INSERT INTO admin_users (id, email, name, password_hash)
+    VALUES (${id}, ${email}, ${name}, ${passwordHash})
+  `;
+
+  return {
+    id,
+    email,
+    name,
     createdAt: new Date().toISOString(),
   };
-
-  users.push(newUser);
-  await writeFile(USERS_FILE, JSON.stringify(users, null, 2));
-
-  const { passwordHash: _p, ...result } = newUser;
-  return result;
 }
 
 export async function hasUsers(): Promise<boolean> {
-  await ensureUsersFile();
-  const data = await readFile(USERS_FILE, "utf-8");
-  const users: AdminUser[] = JSON.parse(data);
-  return users.length > 0;
+  await ensureAdminUsersTable();
+  const rows = asRows<Record<string, unknown>>(
+    await sql`SELECT 1 FROM admin_users LIMIT 1`
+  );
+  return rows.length > 0;
 }
 
 export async function updateUser(
   id: string,
   data: { name?: string; email?: string; password?: string }
 ): Promise<SafeAdminUser | null> {
-  await ensureUsersFile();
-  const users: AdminUser[] = JSON.parse(await readFile(USERS_FILE, "utf-8"));
-  const index = users.findIndex((u) => u.id === id);
-  if (index === -1) return null;
+  await ensureAdminUsersTable();
+
+  const rows = asRows<{
+    id: string;
+    email: string;
+    name: string;
+    password_hash: string;
+    created_at: Date;
+  }>(
+    await sql`
+    SELECT id, email, name, password_hash, created_at
+    FROM admin_users
+    WHERE id = ${id}
+    LIMIT 1
+  `
+  );
+  if (rows.length === 0) return null;
+
+  let name = rows[0]!.name;
+  let email = rows[0]!.email;
+  let passwordHash = rows[0]!.password_hash;
 
   if (data.name !== undefined) {
-    users[index]!.name = data.name.trim();
+    name = data.name.trim();
   }
   if (data.email !== undefined) {
-    const email = data.email.trim().toLowerCase();
-    const existing = users.find(
-      (u) => u.id !== id && u.email.toLowerCase() === email
+    const newEmail = data.email.trim().toLowerCase();
+    const existing = asRows<Record<string, unknown>>(
+      await sql`
+      SELECT 1 FROM admin_users
+      WHERE id != ${id} AND LOWER(email) = LOWER(${newEmail})
+      LIMIT 1
+    `
     );
-    if (existing) {
+    if (existing.length > 0) {
       throw new Error("Bu e-posta adresi başka bir hesapta kullanılıyor.");
     }
-    users[index]!.email = email;
+    email = newEmail;
   }
   if (data.password !== undefined && data.password.trim().length >= 6) {
-    users[index]!.passwordHash = hashPassword(data.password.trim());
+    passwordHash = hashPassword(data.password.trim());
   }
 
-  await writeFile(USERS_FILE, JSON.stringify(users, null, 2));
-  const { passwordHash: _p, ...result } = users[index]!;
-  return result;
+  await sql`
+    UPDATE admin_users
+    SET name = ${name}, email = ${email}, password_hash = ${passwordHash}
+    WHERE id = ${id}
+  `;
+
+  const updated = asRows<{ id: string; email: string; name: string; created_at: Date }>(
+    await sql`SELECT id, email, name, created_at FROM admin_users WHERE id = ${id}`
+  );
+  const r = updated[0]!;
+  return {
+    id: r.id,
+    email: r.email,
+    name: r.name,
+    createdAt: (r.created_at as Date).toISOString(),
+  };
 }
 
 export async function deleteUser(id: string): Promise<boolean> {
-  const users: AdminUser[] = JSON.parse(
-    await readFile(USERS_FILE, "utf-8")
+  await ensureAdminUsersTable();
+  const countRows = asRows<{ count: number }>(
+    await sql`SELECT COUNT(*)::int as count FROM admin_users`
   );
-  if (users.length <= 1) {
+  const count = countRows[0]?.count ?? 0;
+  if (count <= 1) {
     throw new Error("Son yönetici silinemez.");
   }
-  const filtered = users.filter((u) => u.id !== id);
-  if (filtered.length === users.length) return false;
-  await writeFile(USERS_FILE, JSON.stringify(filtered, null, 2));
-  return true;
+
+  const deleted = asRows<{ id: string }>(
+    await sql`DELETE FROM admin_users WHERE id = ${id} RETURNING id`
+  );
+  return deleted.length > 0;
 }
